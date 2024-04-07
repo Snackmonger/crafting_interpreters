@@ -51,7 +51,7 @@
 
     For now, this seems to do the trick, but it looks a litle fragile.
 
-.. code-block:: Python
+.. code-block:: python
 
     def multiline_comment(self) -> None:
         nest_level: int = 1
@@ -119,7 +119,7 @@ Define a visitor class for our syntax tree classes that takes an expression, con
 
     I modified the AST printer class to use a different rendering function::
 
-    .. code-block::
+    .. code-block:: python
         
         def polishize(self, name: str, /, *exprs: Expr) -> str:
             string = ""
