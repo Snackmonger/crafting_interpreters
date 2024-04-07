@@ -129,8 +129,8 @@ Define a visitor class for our syntax tree classes that takes an expression, con
         string += name
         return string
     
-    
-    However, in RSP, the unary negation has to be applied AFTER the negated expression.
-    Therefore, we would have to ensure that there aren't expressions like 3 -4 + (should
-    be 3 4 - +)
+
+However, in RSP, the unary negation has to be applied AFTER the negated expression.
+Therefore, we would have to ensure that there aren't expressions like 3 -4 + (should
+be 3 4 - +)
 
