@@ -51,25 +51,83 @@
 
     For now, this seems to do the trick, but it looks a litle fragile.
 
-    .. codeblock:: Python
+.. codeblock:: Python
 
-        def multiline_comment(self) -> None:
-            nest_level: int = 1
-            while nest_level > 0:
-                if self.is_at_end:
-                    self.lox.error(
-                        self.line, "Unterminated block comment.")
-                    return
-                if self.peek == "\n":
-                    self.line += 1
-                if self.peek == "/" and self.peek_next == "*":
-                    self.advance()
-                    self.advance()
-                    nest_level += 1
-                    continue
-                if self.peek == "*" and self.peek_next == "/":
-                    self.advance()
-                    self.advance()
-                    nest_level -= 1
-                    continue
+    def multiline_comment(self) -> None:
+        nest_level: int = 1
+        while nest_level > 0:
+            if self.is_at_end:
+                self.lox.error(
+                    self.line, "Unterminated block comment.")
+                return
+            if self.peek == "\n":
+                self.line += 1
+            if self.peek == "/" and self.peek_next == "*":
                 self.advance()
+                self.advance()
+                nest_level += 1
+                continue
+            if self.peek == "*" and self.peek_next == "/":
+                self.advance()
+                self.advance()
+                nest_level -= 1
+                continue
+            self.advance()
+
+2.5: Representing Code
+----------------------
+
+1. Earlier, I said that the |, \*, and + forms we added to our grammar metasyntax were just syntactic sugar. 
+Take this grammar ::
+
+    expr → expr ( "(" ( expr ( "," expr )* )? ")" | "." IDENTIFIER )+
+            | IDENTIFIER
+            | NUMBER
+
+Produce a grammar that matches the same language but does not use any of that notational sugar.
+
+Bonus: What kind of expression does this bit of grammar encode? ::
+
+    expr → expr invocation
+        | IDENTIFIER
+        | NUMBER
+    args → expr 
+         → args "," expr
+    invocations → invocations invocation
+    invocations → invocation
+    invocation → "(" ")"
+               | "(" args ")"
+               | "." IDENTIFIER
+
+2. The Visitor pattern lets you emulate the functional style in an object-oriented language. Devise a complementary pattern for a functional language. It should let you bundle all of the operations on one type together and let you define new types easily.
+
+(SML or Haskell would be ideal for this exercise, but Scheme or another Lisp works as well.)
+
+    Answer: I don't know any of those languages well enough even to be able to attempt this question. 
+    I can imagine that a closure is a necessary device here, but I'm not sure how to be able to define 
+    a type in a functional style
+
+3. In reverse Polish notation (RPN), the operands to an arithmetic operator are both placed before the operator, so 1 + 2 becomes 1 2 +. Evaluation proceeds from left to right. Numbers are pushed onto an implicit stack. An arithmetic operator pops the top two numbers, performs the operation, and pushes the result. Thus, this:
+
+(1 + 2) * (4 - 3)
+
+in RPN becomes:
+
+1 2 + 4 3 - *
+
+Define a visitor class for our syntax tree classes that takes an expression, converts it to RPN, and returns the resulting string.
+
+    I modified the AST printer class to use a different rendering function::
+
+        def polishize(self, name: str, /, *exprs: Expr) -> str:
+            string = ""
+            for expr in exprs:
+                string += expr.accept(self)
+                string += " "
+            string += name
+            return string
+    
+    However, in RSP, the unary negation has to be applied AFTER the negated expression.
+    Therefore, we would have to ensure that there aren't expressions like 3 -4 + (should
+    be 3 4 - +)
+

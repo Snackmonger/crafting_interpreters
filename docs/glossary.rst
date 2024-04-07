@@ -1,4 +1,4 @@
-.. toctree::
+.. contents::
 
 Lexical Analysis
 ----------------
@@ -130,3 +130,26 @@ A grammar is regular if:
     - that the non-terminal symbol is always either at the beginning or the end of the rule's right side, and that both positions are not mixed in the grammar
 
 This entails that all words over the grammar's alphabet can be mapped with a tree of finite and constant size.
+
+Visitor Pattern
+---------------
+Goal: Separate an algorithm from the object structure.
+
+This pattern allows us to create functions for objects that already 
+exist without having to add methods to the objects themselves. It can
+be thought of as a way of bridging the gap between a functional approach
+and an object-oriented approach.
+
+An object is defined with a method to ACCEPT a VISITOR.
+
+The VISITOR contains methods corresponding to various different object types that are supported in its interface.
+
+When the object ACCEPTS the VISITOR, it passes itself to the VISITOR's VISIT method. In languages with method signatures, this can be defined with a common
+name and different implementations. In the Python version, we just give the different implementations different names.
+
+The VISIT method in the VISITOR provides some kind of functionality that uses the object's data and returns
+it to the object's ACCEPT method that originally invoked the VISITOR's VISIT method. 
+
+In this way, the original object is able to return the result of a function that uses its own specific data
+structure, but without having to have that function defined within itself (or even knowing anything about the
+function and its return).

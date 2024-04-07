@@ -1126,3 +1126,11 @@ crafting/Lib/site-packages/pip-24.0.dist-info/AUTHORS.txt
 data/__pycache__/enums.cpython-312.pyc
 data/__pycache__/enums.cpython-311.pyc
 data/__pycache__/constants.cpython-312.pyc
+data/__pycache__/protocols.cpython-312.pyc
+src/__pycache__/tools.cpython-312.pyc
+src/__pycache__/expressions.cpython-312.pyc
+src/__pycache__/ast_printer.cpython-312.pyc
+src/tools/__pycache__/__init__.cpython-312.pyc
+src/tools/__pycache__/ast_printer.cpython-312.pyc
+tests/__pycache__/test_ast_printer.cpython-312.pyc
+.gitignore
