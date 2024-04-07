@@ -119,15 +119,15 @@ Define a visitor class for our syntax tree classes that takes an expression, con
 
     I modified the AST printer class to use a different rendering function::
 
-    .. code-block:: python
-        
-        def polishize(self, name: str, /, *exprs: Expr) -> str:
-            string = ""
-            for expr in exprs:
-                string += expr.accept(self)
-                string += " "
-            string += name
-            return string
+.. code-block:: python
+    
+    def polishize(self, name: str, /, *exprs: Expr) -> str:
+        string = ""
+        for expr in exprs:
+            string += expr.accept(self)
+            string += " "
+        string += name
+        return string
     
     However, in RSP, the unary negation has to be applied AFTER the negated expression.
     Therefore, we would have to ensure that there aren't expressions like 3 -4 + (should
