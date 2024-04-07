@@ -1134,3 +1134,6 @@ src/tools/__pycache__/__init__.cpython-312.pyc
 src/tools/__pycache__/ast_printer.cpython-312.pyc
 tests/__pycache__/test_ast_printer.cpython-312.pyc
 .gitignore
+docs/glossary.rst
+tools/__pycache__/__init__.cpython-312.pyc
+tools/__pycache__/ast_printer.cpython-312.pyc
