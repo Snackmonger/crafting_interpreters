@@ -119,7 +119,7 @@ Define a visitor class for our syntax tree classes that takes an expression, con
 
     I modified the AST printer class to use a different rendering function::
 
-    .. code-block::
+    .. code-block:: Python
         
         def polishize(self, name: str, /, *exprs: Expr) -> str:
             string = ""
