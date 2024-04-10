@@ -19,9 +19,9 @@ from src.expressions import (
     Unary,
     Ternary
 )
+from tools.ast_printer import ASTPrinter
 if TYPE_CHECKING:
     from src.lox import Lox
-
 
 class Parser:
     """
@@ -31,7 +31,7 @@ class Parser:
     we call that other rule's method.
     """
 
-    def __init__(self, tokens: Sequence[Token], lox: type["Lox"]) -> None:
+    def __init__(self, tokens: Sequence[Token], lox: "Lox") -> None:
         self.tokens: list[Token] = list(tokens)
         self.current: int = 0
         self.lox = lox
@@ -60,14 +60,14 @@ class Parser:
     def ternary(self) -> Expr:
         """Parse a ternary."""
         # NOTE: Added as part of challenge 2.6.1
-        expr = self.equality()
+        condition = self.equality()
         if self.match(Monographs.QUESTION):
-            then_branch = self.expression()
+            true_branch = self.expression()
             self.consume(Monographs.COLON,
                          "Expect ':' after branch of ternary expression")
-            else_branch = self.ternary()
-            expr = Ternary(expr, then_branch, else_branch)
-        return expr
+            false_branch = self.ternary()
+            condition = Ternary(condition, true_branch, false_branch)
+        return condition
 
     def equality(self) -> Expr:
         """Parse an equality."""

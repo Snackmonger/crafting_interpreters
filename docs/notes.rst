@@ -45,3 +45,19 @@ text file, and we can use that as the basis for generating the protocol class an
 later in the book, we'll also think about statements, and we can modify these tools to generate those from the
 same precursor file. 
 
+Chapter 2, Section 6: Evaluating Expressions
+--------------------------------------------
+
+The Java ``Object`` that the book recommends is not necessary for our implementation of Lox, since Python is already a dynamically
+typed language, and we don't need a special object to hold values of unknown types. Therefore, instead of returning a container 
+class, I just marked the return using a type annotation that encompasses any valid primary value.
+
+In order to incorporate the ternary operators ? : that we added in the last section, we added a new method to the ExprVisitor 
+protocol, which has to be implemented in the interpreter::
+
+    def visit_TernaryExpr(self, expr: Ternary) -> LoxValue:
+        """Interpret a ternary."""
+        cond = self.evaluate(expr.condition)
+        if self.is_truthy(cond):
+            return self.evaluate(expr.true_branch)
+        return self.evaluate(expr.false_branch)
