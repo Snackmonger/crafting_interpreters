@@ -1,13 +1,14 @@
 
+from data.annotations import LoxValue
 from data.enums import TokenType
 
 
 
 class Token:
-    def __init__(self, token_type: TokenType, lexeme: str, literal: object | None, line: int) -> None:
+    def __init__(self, token_type: TokenType, lexeme: str, literal: LoxValue, line: int) -> None:
         self.token_type: TokenType = token_type
         self.lexeme: str =  lexeme
-        self.literal: object = literal
+        self.literal: LoxValue = literal
         self.line: int = line
 
     def __repr__(self) -> str:

@@ -1140,3 +1140,5 @@ tools/__pycache__/ast_printer.cpython-312.pyc
 data/errors.py
 src/__pycache__/parser.cpython-312.pyc
 data/__pycache__/errors.cpython-312.pyc
+data/__pycache__/annotations.cpython-312.pyc
+src/__pycache__/interpreter.cpython-312.pyc

@@ -42,7 +42,7 @@ class ASTPrinter:
     @ staticmethod
     def visit_TernaryExpr(expr: Ternary) -> str:
         """Represent a ternary expression in a string."""
-        return ASTPrinter.parenthesize("?:", expr.expression, expr.then_branch, expr.else_branch)
+        return ASTPrinter.parenthesize("?:", expr.condition, expr.true_branch, expr.false_branch)
 
     @staticmethod
     def parenthesize(name: str, /, *exprs: Expr) -> str:

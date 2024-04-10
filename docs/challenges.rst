@@ -203,10 +203,10 @@ Write the grammar, and then implement the necessary parsing code.
     then we have to be able to distinguish between the comma as an expression operator, and the comma as a separator operator.
 
     Commas are used as separators in: 
-    - multiple variable declaration
-    - parameters
-    - multiple conditional protases (``if (x > 5, x < 50) {...}``)
-    - multiple values in loop initialization (``for (i = 0, j = 10; i < 99; i++, j--){...}``)
+        - multiple variable declaration
+        - parameters
+        - multiple conditional protases (``if (x > 5, x < 50) {...}``)
+        - multiple values in loop initialization (``for (i = 0, j = 10; i < 99; i++, j--){...}``)
 
 
 2. Likewise, add support for the C-style conditional or “ternary” operator ?:. 
@@ -237,7 +237,7 @@ expression. Report that as an error, but also parse and discard a right-hand ope
 with the appropriate precedence.
 
     Answer: Error reporting is not an existing feature of the grammar. We'll add an error
-    as the highest priority at the bottom of the parsing tree. . 
+    as the highest priority at the bottom of the parsing tree::
 
         primary     -> NUMBER | STRING | 'true' | 'false' | 'nil'
                     | "(" expression ")"
@@ -275,3 +275,34 @@ with the appropriate precedence.
     I suppose that we want to limit the amount of following tokens that could possibly be mis-parsed as part
     of the syntax error? In any case, I followed the guide in the book and updated the grammar with the correct
     answer rather than my own.
+
+2.7: Evaluating Expressions
+---------------------------
+
+1. Allowing comparisons on types other than numbers could be useful. The operators might have a reasonable 
+interpretation for strings. Even comparisons among mixed types, like 3 < "pancake" could be handy to enable 
+things like ordered collections of heterogeneous types. Or it could simply lead to bugs and confusion.
+
+    Would you extend Lox to support comparing other types? If so, which pairs of types do you allow and how 
+    do you define their ordering? Justify your choices and compare them to other languages.
+
+    Answer: It is useful to be able to compare data structures, not just arrays and mappings, but also strings.
+    Lox does not support arrays, but if it did, we should be able to compare the two arrays. As far as mixed 
+    types, I think I would prefer to see explicit type-casting in the code, if only for the benefit of readability.
+
+2. Many languages define + such that if either operand is a string, the other is converted to a string and 
+the results are then concatenated. For example, "scone" + 4 would yield scone4. Extend the code in 
+visitBinaryExpr() to support that.
+
+    Answer: This can be easily done in Python with a simple conditional structure. I don't want to implement
+    this feature so I am going to skip this challenge.
+
+3. What happens right now if you divide a number by zero? What do you think should happen? Justify your 
+choice. How do other languages you know handle division by zero, and why do they make the choices they do?
+
+    Change the implementation in visitBinaryExpr() to detect and report a runtime error for this case.
+
+    Answer: Attempting to divide by zero should result in an error. It is impossible to divide by zero and
+    there is no result we can return which does not represent a miscalculation. Therefore, we must raise
+    an error and assume that the user will try/catch for that possibility in contexts where it is appropriate. 
+    (Note: this means that we would have to add try/catch, since Lox does not support it)

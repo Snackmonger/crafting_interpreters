@@ -23,13 +23,13 @@ class Scanner():
     characters into meaningful lexical categories (tokens).
     """
 
-    def __init__(self, source: str, lox: type["Lox"]) -> None:
+    def __init__(self, source: str, lox: "Lox") -> None:
         self.source: str = source
         self.tokens: list[Token] = []
         self.start: int = 0
         self.current: int = 0
         self.line: int = 1
-        self.lox: type["Lox"] = lox
+        self.lox = lox
 
     def scan_tokens(self) -> list[Token]:
         """Analyse the source text into recognized tokens."""

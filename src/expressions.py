@@ -4,6 +4,7 @@
 from dataclasses import dataclass
 from typing import Optional, Any
 
+from data.annotations import LoxValue
 from data.protocols import ExprVisitor
 from src.token import Token
 
@@ -38,7 +39,7 @@ class Grouping(Expr):
 @dataclass
 class Literal(Expr):
     """A representation of a literal expression."""
-    value: Optional[object]
+    value: Optional[LoxValue]
 
     def accept(self, visitor: ExprVisitor) -> Any:
         return visitor.visit_LiteralExpr(self)
@@ -56,9 +57,9 @@ class Unary(Expr):
 @dataclass
 class Ternary(Expr):
     """A representation of a ternary expression."""
-    expression: Expr
-    then_branch: Expr
-    else_branch: Expr
+    condition: Expr
+    true_branch: Expr
+    false_branch: Expr
 
     def accept(self, visitor: ExprVisitor) -> Any:
         return visitor.visit_TernaryExpr(self)

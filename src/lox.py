@@ -3,7 +3,9 @@ from loguru import logger
 
 from typing import Optional
 from data.enums import Miscellania
+from data.errors import LoxRuntimeError
 from src.expressions import Expr
+from src.interpreter import Interpreter
 from src.parser import Parser
 from src.token import Token
 from src.scanner import Scanner
@@ -11,68 +13,74 @@ from tools.ast_printer import ASTPrinter
 
 
 class Lox:
-    """The main interpreter for the Lox language.
+    """The main interface for the Lox language interpreter.
     
     Lox is a scripting language, which means it executes directly from source.
     Our interpreter supports two ways of running code. You can run a source 
     file passed as an argument to the main function, or you can run the main
     function without any arguments to enter the interactive interpreter.
     """
-    had_error: bool = False
 
-    @staticmethod
-    def main(*args: str) -> None:
+    def __init__(self):
+        self.had_error: bool = False
+        self.had_runtime_error: bool = False
+        self.interpreter: Interpreter = Interpreter(self)
+
+    def main(self, *args: str) -> None:
         if len(args) > 1:
             print("Usage: plox [script]")
             sys.exit(64)
         elif len(args) == 1:
-            Lox.run_file(args[0])
+            self.run_file(args[0])
         else:
-            Lox.run_prompt()
+            self.run_prompt()
 
-    @staticmethod
-    def run_prompt() -> None:
+    def run_prompt(self) -> None:
         """Run the interactive REPL (read, evaluate, print, loop)."""
         while True:
             line = input("> ")
             if line == "quit()":
                 break
-            Lox.run(line)
-            Lox.had_error = False
+            self.run(line)
+            self.had_error = False
 
-    @staticmethod
-    def run(source: str) -> None:
+    def run(self, source: str) -> None:
         """Run the source file as a script."""
-        if Lox.had_error:
+        if self.had_error:
             sys.exit(65)
-        scanner: Scanner = Scanner(source, Lox)
+        if self.had_runtime_error:
+            sys.exit(70)
+        scanner: Scanner = Scanner(source, self)
         tokens: list[Token] = scanner.scan_tokens()
-        parser: Parser = Parser(tokens, Lox)
+        parser: Parser = Parser(tokens, self)
         expression: Optional[Expr] = parser.parse()
-        if Lox.had_error:
-            logger.info(f"Lox interpreter encountered an error.")
+        if self.had_error:
+            logger.info("Lox encountered an error.")
             return
-        print(ASTPrinter.print(expression))
+        print(tokens)
+        ASTPrinter.print(expression)
+        self.interpreter.interpret(expression)
 
-    @staticmethod
-    def run_file(path: str) -> None:
+    def run_file(self, path: str) -> None:
         """Create a"""
         with open(path, encoding="utf8") as f:
-            Lox.run(str(f))
+            self.run(str(f))
 
-    @staticmethod
-    def error(line: int | Token, message: str) -> None:
+    def error(self, line: int | Token, message: str) -> None:
         """Configure and report an error."""
         if isinstance(line, Token):
             if line.token_type == Miscellania.EOF:
-                Lox.report(line.line, " at end", message)
+                self.report(line.line, " at end", message)
             else:
-                Lox.report(line.line, " at '" + line.lexeme + "'", message)
+                self.report(line.line, " at '" + line.lexeme + "'", message)
         else:
-            Lox.report(line, "", message)
+            self.report(line, "", message)
 
-    @staticmethod
-    def report(line: int, where: str, message: str) -> None:
+    def runtime_error(self, error: LoxRuntimeError) -> None:
+        print(error.message + "\n[line " + str(error.token.line) + "]")
+        self.had_runtime_error = True
+
+    def report(self, line: int, where: str, message: str) -> None:
         """Report an error and indicate to the interpreter that the code failed."""
         print("[line " + str(line) + "] Error" + where + ": " + message)
-        Lox.had_error = True
+        self.had_error = True
