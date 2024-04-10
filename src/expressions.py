@@ -53,3 +53,13 @@ class Unary(Expr):
     def accept(self, visitor: ExprVisitor) -> Any:
         return visitor.visit_UnaryExpr(self)
 
+@dataclass
+class Ternary(Expr):
+    """A representation of a ternary expression."""
+    expression: Expr
+    then_branch: Expr
+    else_branch: Expr
+
+    def accept(self, visitor: ExprVisitor) -> Any:
+        return visitor.visit_TernaryExpr(self)
+

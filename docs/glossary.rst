@@ -4,7 +4,7 @@
 Lexical Analysis
 ----------------
 A scanner/lexer takes in a linear stream of characters and chunks them
-together into a series of comething more akin to "words". Each of these 
+together into a series of something more akin to "words". Each of these 
 words is called a token. Some tokens are single characters, like ( and , .
 Others may be several characters long, like numbers (123), strings ("hi!"), 
 and identifiers (min). Some characters are not semantically relevant, and may
@@ -154,3 +154,33 @@ it to the object's ACCEPT method that originally invoked the VISITOR's VISIT met
 In this way, the original object is able to return the result of a function that uses its own specific data
 structure, but without having to have that function defined within itself (or even knowing anything about the
 function and its return).
+
+
+Precedence
+----------
+When evaluating an expression, precedence determines which operator is evaluated first in an expression
+containing a mixture of different operators.
+
+Associativity
+-------------
+When evaluating an expression, assiciativity determines which operator is evaluated first in a series of
+the same operator. When an operator that is left-associative, operators on the left will evaluate before those
+on the right, and vice-versa. 
+
+Left associative: 5 - 3 - 1 >> (5 - 3) - 1
+Right associative: a = b = c >> a = (b = c)
+
+An operator may also be non-associative, meaning that it cannot be used more than once in a sequence.
+
+Panic Mode
+----------
+When the parser encounters an error, it enters panic mode. It knows that at least one token doesn't make sense
+in its current state in the middle of some stack of grammar productions.
+
+Before it can get back to parsin, it needs to get its state and the sequence of forthcoming
+tokens aligned such that the next token does match the rule being parsed. This process is called synchronization.
+
+To do that, we select a rule in the grammar that will mark the synchronization point. The parser fixes its state by 
+jumping out of any nested productions until it gets back to this rule. Then it synchronizes the token stream by
+discarding tokens until it reaches one that can appear at that point in the rule.
+

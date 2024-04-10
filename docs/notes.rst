@@ -30,7 +30,7 @@ Index off by 1 error:
             self.current += 1
             return self.source[self.current - 1]
 
-Chapter 2, Section 4: Representing Code
+Chapter 2, Section 5: Representing Code
 ---------------------------------------
 
 We created a protocol to serve the same function as the interface in the Java program in the book. Because Python is dynamically
@@ -43,4 +43,5 @@ the Python version has to generate different code. As the book says, scripting l
 kind of task, so this was a fun little side track. I put all the information for the class definitions in a 
 text file, and we can use that as the basis for generating the protocol class and the AST classes. A little
 later in the book, we'll also think about statements, and we can modify these tools to generate those from the
-same precursor file.
+same precursor file. 
+

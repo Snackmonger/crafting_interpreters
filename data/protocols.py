@@ -7,7 +7,8 @@ if TYPE_CHECKING:
         Binary,
         Grouping,
         Literal,
-        Unary
+        Unary,
+        Ternary
     )
 
 
@@ -19,3 +20,4 @@ class ExprVisitor(Protocol):
     def visit_GroupingExpr(self, expr: "Grouping") -> Any: ...
     def visit_LiteralExpr(self, expr: "Literal") -> Any: ...
     def visit_UnaryExpr(self, expr: "Unary") -> Any: ...
+    def visit_TernaryExpr(self, expr: "Ternary") -> Any: ...

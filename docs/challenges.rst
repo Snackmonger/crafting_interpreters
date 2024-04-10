@@ -134,3 +134,144 @@ However, in RSP, the unary negation has to be applied AFTER the negated expressi
 Therefore, we would have to ensure that there aren't expressions like 3 -4 + (should
 be 3 4 - +)
 
+2.6: Parsing
+------------
+
+1. In C, a block is a statement form that allows you to pack a series of statements 
+where a single one is expected. The comma operator is an analogous syntax for expressions. 
+A comma-separated series of expressions can be given where a single expression is expected 
+(except inside a function call's argument list). At runtime, the comma operator evaluates 
+the left operand and discards the result. Then it evaluates and returns the right operand.
+
+Add support for comma expressions. Give them the same precedence and associativity as in C. 
+Write the grammar, and then implement the necessary parsing code.
+
+    Answer: I don't know C, so I had to look into this a bit. In a series of expressions, each
+    one is evaluated in turn and discarded, and the rightmost expression retains the final value.
+
+    Example::
+
+        #include <stdio.h>
+
+        int main() {
+        int a = 5, b = 10, result;
+
+        result = (a = a + b, b = a - b, a); // Comma operator used in an expression
+
+        printf("Result: %d\n", result);
+
+        return 0;
+        }
+
+    The result will be 15. First, a = a + b (a = 5 + 10 = 15), then b = a - b (b = 15 - 10 = 5), then a (a = 15).
+    At this point, the assignment to b (b = a - b) is discarded, and a=15 is assigned to ``result``. If we ended with ``, b``,
+    then the ``result`` would be b=5, and the a=15 would be discarded.
+
+    Each segment of the comma expression is an expression (that is to say, an ``equality``) in its own right; because of this, the comma has
+    to come HIGH in the top down parser (i.e. it has LOW precedence). A comma expression is a series of expressions, and since an expression 
+    produces an equality, a comma expression is thus an equality optionally followed by a comma token and an equality (which recursively allows
+    for any number of commas to constitute a comma expression). Thus, the Lox grammar that was::
+
+        expression     → equality ;
+        equality       → comparison ( ( "!=" | "==" ) comparison )* ;
+    
+    now becomes::
+
+        expression  -> comma
+        comma       -> equality ("," equality)*
+        equality ... 
+
+    In order to implement this, the LOW precedence demands that this rule comes HIGH in our parser's 
+    logic tree. We need to create a method called by ``expression`` that checks whether the current 
+    expression is followed by a comma, and create a Binary that takes the left expression, and checks
+    whether the right side is also a comma or whether it is a more specific equality.
+
+    This is the way the grammar works between ``expression`` and ``unary``. In other words, the intermediary
+    rules are all types of ``binary`` but we have defined them in more specific ways. Thus, an expression
+    like 5 + 7, which has a right and a left side, can be compounded like 5 + 7 + 8 + 24, and these expressions
+    are equally binary, but differ in the amount of nested binary expressions in the right side. We can understand
+    5 + 7 as (5) + (7) in which each each side evaluates to a unary (and ultimately, a primary). In the same way,
+    5 + 7 + 8 + 24 is just a series of binaries: (5 + (7 + (8 + (24)))) that trace the descent of the binary until it
+    becomes a unary, which in turn produces a primary. In the same way, a series of expressions separated by commas can
+    also be understood as a binary with arbitrarily-deep nesting: 4, 5, 6, 7 represents (4, (5, (6, (7)))). Later, when
+    we build the resolver, whatever occupies the rightmost slot of the last binary gets returned as the final value of 
+    the expression.
+
+    CAVEAT: If we want to implement this syntax, we will have to revisit this when the time comes to write call syntax, because
+    func(3, 4, 6) should retain three separate values, rather than resolving to the last value. I don't think this language has 
+    its own tuple/list/array class, but if we want to be able to do assignments like ``list = (1, 2, 3, 4);`` or ``x = 7, y = 9;``
+    then we have to be able to distinguish between the comma as an expression operator, and the comma as a separator operator.
+
+    Commas are used as separators in: 
+    - multiple variable declaration
+    - parameters
+    - multiple conditional protases (``if (x > 5, x < 50) {...}``)
+    - multiple values in loop initialization (``for (i = 0, j = 10; i < 99; i++, j--){...}``)
+
+
+2. Likewise, add support for the C-style conditional or “ternary” operator ?:. 
+What precedence level is allowed between the ? and :? Is the whole operator 
+left-associative or right-associative?
+
+    Answer: The ternary condition is something like ``v = x < y ? 7 : 10``,
+    which means: v is equal to (if x < y) 7, (else) 10.
+
+    So a ternary is an equality (which might be a comparison, as in the example above,
+    or some other equality expression), which is followed by zero or one sequences
+    of "?" expression ":" ternary, which allows any numer of ternary expressions to
+    be recursively nested in the expression, but ensures that only one or fewer 
+    occurrs in a single expression::
+
+        expression     → comma
+        comma          → ternary ("," ternary)*
+        ternary        → equality ("?" expression ":" ternary)?
+        equality       → comparison ( ( "!=" | "==" ) comparison )* ;
+        ...
+
+    If we want to make this syntax meaningful, we will have to remember to implement
+    appropriate changes to accomodate it later.
+
+3. Add error productions to handle each binary operator appearing without a left-hand 
+operand. In other words, detect a binary operator appearing at the beginning of an 
+expression. Report that as an error, but also parse and discard a right-hand operand 
+with the appropriate precedence.
+
+    Answer: Error reporting is not an existing feature of the grammar. We'll add an error
+    as the highest priority at the bottom of the parsing tree. . 
+
+        primary     -> NUMBER | STRING | 'true' | 'false' | 'nil'
+                    | "(" expression ")"
+                    | error
+        error       -> ("=="|"!=") expression
+                    | (">="|"<="|"<"|">") expression
+                    | ("+") expression
+                    | ("*"|"/") expression
+
+    When I looked at the answer provided in the book, it said this instead::
+
+        primary    → NUMBER | STRING | "true" | "false" | "nil"
+                    | "(" expression ")"
+                    // Error productions...
+                    | ( "!=" | "==" ) equality
+                    | ( ">" | ">=" | "<" | "<=" ) comparison
+                    | ( "+" ) term
+                    | ( "/" | "*" ) factor ;
+
+    And gave the following explanation:
+
+        "With the normal infix productions, the operand non-terminals are one precedence level higher 
+        than the operator's own precedence. In order to handle a series of operators of the same precedence, 
+        the rules explicitly allow repetition.
+
+        With the error productions, though, the right-hand operand rule is the same precedence level. That 
+        will effectively strip off the erroneous leading operator and then consume a series of infix uses 
+        of operators at the same level by reusing the existing correct rule. For example:
+
+        ``+ a - b + c - d``
+
+        The error production for + will match the leading + and then use term to also match the rest of the 
+        expression.""
+
+    I suppose that we want to limit the amount of following tokens that could possibly be mis-parsed as part
+    of the syntax error? In any case, I followed the guide in the book and updated the grammar with the correct
+    answer rather than my own.

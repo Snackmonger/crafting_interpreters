@@ -23,13 +23,13 @@ class Scanner():
     characters into meaningful lexical categories (tokens).
     """
 
-    def __init__(self, source: str, lox: "Lox") -> None:
+    def __init__(self, source: str, lox: type["Lox"]) -> None:
         self.source: str = source
         self.tokens: list[Token] = []
         self.start: int = 0
         self.current: int = 0
         self.line: int = 1
-        self.lox: "Lox" = lox
+        self.lox: type["Lox"] = lox
 
     def scan_tokens(self) -> list[Token]:
         """Analyse the source text into recognized tokens."""
@@ -60,6 +60,8 @@ class Scanner():
             case '-': self.add_token(Monographs.MINUS)
             case '+': self.add_token(Monographs.PLUS)
             case ';': self.add_token(Monographs.SEMICOLON)
+            case ':': self.add_token(Monographs.COLON)
+            case '?': self.add_token(Monographs.QUESTION)
             case '*': self.add_token(Monographs.STAR)
             case "!": self.add_token(Digraphs.BANG_EQUAL if self.match("=") else Monographs.BANG)
             case "=": self.add_token(Digraphs.EQUAL_EQUAL if self.match("=") else Monographs.EQUAL)
@@ -202,3 +204,4 @@ class Scanner():
         token_type = Literals.IDENTIFIER if text not in ReservedWords else ReservedWords(
             text)
         self.add_token(token_type)
+

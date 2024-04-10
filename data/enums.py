@@ -26,6 +26,7 @@ class Monographs(TokenType):
     CARAT = "^"
     MODULO = "%"
     COLON = ":"
+    QUESTION = "?" # Challenge 2.6.2
     EQUAL = '='
     LESS = '<'
     GREATER = '>'

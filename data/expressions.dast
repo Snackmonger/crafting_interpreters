@@ -3,7 +3,8 @@
 # file, but it's so much COOLER to use our own extension).
 #
 # Structure:
-# SUPERCLASS[semicolon]CLASS[semicolon]ARG_NAME: ARG_TYPE[comma]ARG_NAME: ARG_TYPE[&c. as needed]
+# S = superclass name, C = class name, A = arg name, T = arg type
+# S;C;A: T,A: T,A: T,A: T
 # 
 # E.g., the phrase
 #   Expr;Binary;left: Expr,operator: Token,right: Expr
@@ -22,3 +23,4 @@ Expr;Binary;left: Expr,operator: Token,right: Expr
 Expr;Grouping;expression: Expr
 Expr;Literal;value: object
 Expr;Unary;operator: Token,right: Expr
+Expr;Ternary;expression: Expr,then_branch: Expr,else_branch: Expr
