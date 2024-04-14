@@ -1,4 +1,8 @@
+"""The scanner/lexer/tokenizer for the program.
 
+The scanner is responsible for reading the source text and sorting its
+characters into meaningful lexical categories (tokens).
+"""
 from typing import Optional, TYPE_CHECKING
 from data.enums import (
     Digraphs,
@@ -19,8 +23,7 @@ if TYPE_CHECKING:
 
 
 class Scanner():
-    """The scanner is responsible for reading the source text and sorting its
-    characters into meaningful lexical categories (tokens).
+    """The scanner for the Lox lexical grammar.
     """
 
     def __init__(self, source: str, lox: "Lox") -> None:

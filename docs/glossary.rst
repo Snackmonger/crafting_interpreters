@@ -184,3 +184,4 @@ To do that, we select a rule in the grammar that will mark the synchronization p
 jumping out of any nested productions until it gets back to this rule. Then it synchronizes the token stream by
 discarding tokens until it reaches one that can appear at that point in the rule.
 
+

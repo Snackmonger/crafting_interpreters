@@ -1,13 +1,8 @@
+"""Enums used in the program."""
 from enum import StrEnum
 
 class TokenType(StrEnum):
     """Parent class of token type enums."""
-
-    @classmethod
-    def as_dict(cls) -> dict[str, str]:
-        """Return a dictionary of the enum values."""
-        return {key: str(value) for key, value in cls.__members__.items()}
-
 
 class Monographs(TokenType):
     """Single-character tokens."""
@@ -66,5 +61,6 @@ class ReservedWords(TokenType):
     WHILE = 'while'
 
 class Miscellania(TokenType):
+    """Token types that don't easily fit into another category."""
     EOF = 'eof'
 

@@ -306,3 +306,107 @@ choice. How do other languages you know handle division by zero, and why do they
     there is no result we can return which does not represent a miscalculation. Therefore, we must raise
     an error and assume that the user will try/catch for that possibility in contexts where it is appropriate. 
     (Note: this means that we would have to add try/catch, since Lox does not support it)
+
+2.8: Statements and State
+-------------------------
+
+1. The REPL no longer supports entering a single expression and automatically 
+printing its result value. That's a drag. Add support to the REPL to let users 
+type in both statements and expressions. If they enter a statement, execute it. 
+If they enter an expression, evaluate it and display the result value.4
+
+    Answer:
+    .. codeblock:: 
+        
+        def interpret(self, statements: Sequence[Stmt | None]) -> None:
+            """Interpret the given statements."""
+            try:
+                for statement in statements:
+                    if isinstance(statement, Expression) and not isinstance(statement.expression, Assign):
+                        statement = Print(statement.expression)
+                    if statement:
+                        self.execute(statement)
+            except LoxRuntimeError as e:
+                self.lox.runtime_error(e)
+
+    If the statement is an Expression statement and does not contain an assignment, 
+    then change it to a Print statement and it will be displayed to the screen. 
+    This solution works for now, but it will obviously have to be updated for 
+    every context in which an Expression might be used that SHOULDN'T be printed.
+    Depending on the size of the language, it might not be unreasonable to use 
+    this ad hoc option, but it is hardly appropriate for a larger project.
+
+    When I looked up the answer in the back of the book, the solution was very 
+    different, so I reverted my solution to the previous state. I want to see what 
+    other changes happen to the code before I implement the book's solution, so 
+    this is a TODO for later.
+
+2. Maybe you want Lox to be a little more explicit about variable initialization. 
+Instead of implicitly initializing variables to nil, make it a runtime error to 
+access a variable that has not been initialized or assigned to, as in:
+
+::
+
+    // No initializers.
+    var a;
+    var b;
+
+    a = "assigned";
+    print a; // OK, was assigned first.
+
+    print b; // Error!
+
+
+Answer: I came up with a solution similar to the answer in the book. The variable is created with an UninitializedVariable() object, which gets
+a copy of the name of the variable that it's assigned to. Then, when the interpreter encounters a Variable expression, it checks whether 
+the value is an instance of the UninitializedVariable class, and prints the stored error message if so.
+
+This pattern consists of a simple dummy object::
+
+    class UninitializedVariable:
+        def __init__(self, varname: str):
+            self.message: str = f"Variable '{varname}' must be initialized before use."
+
+and a few changes to the interpreter::
+
+    def visit_VarStmt(self, stmt: Var) -> None:
+        """Interpret a variable statement::
+        
+            varDecl → "var" IDENTIFIER ("=" expression)? ";"
+        """
+        value: LoxValue = UninitializedVariable(stmt.name.lexeme)
+        if stmt.initializer is not None:
+            value = self.evaluate(stmt.initializer)
+        self.environment.define(stmt.name.lexeme, value)
+
+    def visit_VariableExpr(self, expr: Variable) -> LoxValue:
+        """Interpret a variable expression::
+        
+            IDENTIFIER → primary
+        """
+        value = self.environment.get(expr.name)
+        if isinstance(value, UninitializedVariable):
+            raise LoxRuntimeError(expr.name, value.message)
+        return self.environment.get(expr.name)
+
+
+3. What does the following program do?
+
+::
+
+    var a = 1;
+    {
+        var a = a + 2;
+        print a;
+    }
+
+What did you expect it to do? Is it what you think it should do? What does analogous code in other languages you are familiar with do? What do you think users will expect this to do?
+
+Answer: I expect that the console display a "3". The logic is: var (inner) a = (outer) a + 2. The assignment ``var a =`` in the code block is defined in terms of ``a``, which does not 
+exist in the local scope until after the variable declaration is completed. Therefore, when the interpreter looks for ``a`` to evaluate the expression part of the assignment, it only finds
+the ``a`` in the outer scope. After this, the local scope adds ``a`` to the mapping of variables with a value of outer ``a`` plus 2. Then the interpreter looks for ``a`` in the print 
+statement and finds the local ``a``, so it doesn't bother looking for the global ``a``. 
+
+This is how the assignment works in Python, which is what I'm familiar with. Users' expectations are determined by prior experience, so there's no way to know what they might expect.
+It seems like the behaviour makes sense, and it's what I would expect to happen.
+

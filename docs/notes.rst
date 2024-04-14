@@ -45,7 +45,7 @@ text file, and we can use that as the basis for generating the protocol class an
 later in the book, we'll also think about statements, and we can modify these tools to generate those from the
 same precursor file. 
 
-Chapter 2, Section 6: Evaluating Expressions
+Chapter 2, Section 7: Evaluating Expressions
 --------------------------------------------
 
 The Java ``Object`` that the book recommends is not necessary for our implementation of Lox, since Python is already a dynamically

@@ -1,15 +1,14 @@
+"""Main interface class for using the Lox interpreter."""
 import sys
 from loguru import logger
 
-from typing import Optional
 from data.enums import Miscellania
 from data.errors import LoxRuntimeError
-from src.expressions import Expr
+from src.expressions import Stmt
 from src.interpreter import Interpreter
 from src.parser import Parser
 from src.token import Token
 from src.scanner import Scanner
-from tools.ast_printer import ASTPrinter
 
 
 class Lox:
@@ -53,13 +52,11 @@ class Lox:
         scanner: Scanner = Scanner(source, self)
         tokens: list[Token] = scanner.scan_tokens()
         parser: Parser = Parser(tokens, self)
-        expression: Optional[Expr] = parser.parse()
+        statements: list[Stmt] = parser.parse()
         if self.had_error:
             logger.info("Lox encountered an error.")
             return
-        print(tokens)
-        ASTPrinter.print(expression)
-        self.interpreter.interpret(expression)
+        self.interpreter.interpret(statements)
 
     def run_file(self, path: str) -> None:
         """Create a"""
@@ -77,10 +74,11 @@ class Lox:
             self.report(line, "", message)
 
     def runtime_error(self, error: LoxRuntimeError) -> None:
+        """Report a runtime error and indicate that the code failed."""
         print(error.message + "\n[line " + str(error.token.line) + "]")
         self.had_runtime_error = True
 
     def report(self, line: int, where: str, message: str) -> None:
-        """Report an error and indicate to the interpreter that the code failed."""
+        """Report an error and indicate that the code failed."""
         print("[line " + str(line) + "] Error" + where + ": " + message)
         self.had_error = True

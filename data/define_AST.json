@@ -1,0 +1,98 @@
+{
+    "Expr": {
+        "name": "an expression",
+        "symbol": "Expr",
+        "members": [
+            {
+                "name": "a binary expression",
+                "symbol": "Binary",
+                "args": [
+                    "left: Expr",
+                    "operator: Token",
+                    "right: Expr"
+                ]
+            },
+            {
+                "name": "a grouping expression",
+                "symbol": "Grouping",
+                "args": [
+                    "expression: Expr"
+                ]
+            },
+            {
+                "name": "a literal expression",
+                "symbol": "Literal",
+                "args": [
+                    "value: LoxValue"
+                ]
+            },
+            {
+                "name": "a unary expression",
+                "symbol": "Unary",
+                "args": [
+                    "operator: Token",
+                    "right: Expr"
+                ]
+            },
+            {
+                "name": "a ternary expression",
+                "symbol": "Ternary",
+                "args": [
+                    "condition: Expr",
+                    "true_branch: Expr",
+                    "false_branch: Expr"
+                ]
+            },
+            {
+                "name": "a variable expression",
+                "symbol": "Variable",
+                "args":[
+                    "name: Token"
+                ]
+            },
+            {
+                "name": "an assignment expression",
+                "symbol": "Assign",
+                "args":[
+                    "name: Token",
+                    "value: Expr"
+                ]
+            }
+        ]
+    },
+    "Stmt": {
+        "name": "a statement",
+        "symbol": "Stmt",
+        "members": [
+            {
+                "name": "an expression statement",
+                "symbol": "Expression",
+                "args": [
+                    "expression: Expr"
+                ]
+            },
+            {
+                "name": "a print statement",
+                "symbol": "Print",
+                "args": [
+                    "expression: Expr"
+                ]
+            },
+            {
+                "name": "a variable statement",
+                "symbol": "Var",
+                "args": [
+                    "name: Token",
+                    "initializer: Optional[Expr]"
+                ]
+            },
+            {
+                "name": "a block statement",
+                "symbol": "Block",
+                "args": [
+                    "statements: list[Stmt]"
+                ]
+            }
+        ]
+    }
+}

@@ -1,38 +1,99 @@
 As of chapter 2.5, I will update the grammar of the program to reflect the state of 
-development, plus any extra syntax that I have added as part of the challenges::
-
-    expression     → comma
-    comma          → ternary ("," ternary)*
-    ternary        → equality ("?" expression ":" ternary)?
-    equality       → comparison ( ( "!=" | "==" ) comparison )* ;
-    comparison     → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
-    term           → factor ( ( "-" | "+" ) factor )* ;
-    factor         → unary ( ( "/" | "*" ) unary )* ;
-    unary          → ( "!" | "-" ) unary
-                    | primary ;
-    primary        → NUMBER | STRING | "true" | "false" | "nil"
-                    | "(" expression ")" ;
-                    | error
-    error          → ("==" | "!=") equality
-                    | (">=" | "<=" | "<" | ">") comparison
-                    | ("+") term
-                    | ("*" | "/") factor
+development, plus any extra syntax that I have added as part of the challenges. In 
+some cases, I have added some redundant productions to separate the different levels
+in the descent more obviously.
 
 Note: The use of "term" and "factor" are not applied correctly. We should correct this
 once we reach the final state of the interpreter, but for now we will follow the book's 
-terminology to avoid introducing mistakes.
+terminology to avoid introducing mistakes. 
+(Let's use: equality > comparison > additive > multiplicative > unary)
 
-A recursive descent parser is a literal translation of the grammar's rules straight 
-into imperative code. Each rule becomes a function. The body of the rule translates 
-to code roughly like:: 
+::
 
-    Grammar notation 	Code representation
-    ----------------    -------------------
-    Terminal	        Code to match and consume a token
-    Nonterminal	        Call to that rule's function
-    |	                if or switch statement
-    * or +	            while or for loop
-    ?	                if statement
+    // Start symbol
+    program         
+        → declaration* EOF;
 
-The descent is described as “recursive” because when a grammar rule refers to 
-itself--directly or indirectly--that translates to a recursive function call.
+    // Declarations
+    declaration     
+        → varDecl
+        | statement
+        ;
+    varDecl         
+        → "var" IDENTIFIER ("=" expression)? ";" 
+        ;
+
+    // Statements
+    statement       
+        → exprStmt
+        | printStmt
+        | block
+        ;
+    exprStmt        
+        → expression ";"
+        ;
+    printStmt      
+        → "print" expression ";"
+        ;
+    block
+        → "{" declaration "}"
+
+    // Expressions
+    expression
+        → assignment
+        ; 
+    assignment         
+        → IDENTIFIER "=" assignment
+        | ternary
+        ;
+    ternary         
+        → binary ("?" expression ":" ternary)?
+        ;
+
+    // Binary expressions
+    binary          
+        → equality
+        ;    
+    equality        
+        → comparison ( ( "!=" | "==" ) comparison )* 
+        ;
+    comparison      
+        → term ( ( ">" | ">=" | "<" | "<=" ) term )* 
+        ;
+    term              
+        → factor ( ( "-" | "+" ) factor )* 
+        ;
+    factor              
+        → unary ( ( "/" | "*" ) unary )* 
+        ; // modulus goes here
+
+    // Unary expressions
+    unary           
+        → ( "!" | "-" ) unary 
+        | primary
+        ;
+
+    // pre_increment -> ("--" | "++") primary
+
+    // post_increment -> primary ("--" | "++") 
+
+    // Primary terminals
+    primary         
+        → NUMBER 
+        | STRING 
+        | "true" 
+        | "false" 
+        | "nil" 
+        | "(" expression ")" 
+        | IDENTIFIER
+        | error
+        ;
+
+    // Error productions
+    error           
+        → ("==" | "!=") equality
+        | (">=" | "<=" | "<" | ">") comparison
+        | ("+") term
+        | ("*" | "/") factor
+        ;
+
