@@ -27,11 +27,20 @@
                 ]
             },
             {
+                "name": "a logical expression",
+                "symbol": "Logical",
+                "args": [
+                    "left: Expr",
+                    "operator: Token",
+                    "right: Expr"
+                ]
+            },
+            {
                 "name": "a unary expression",
                 "symbol": "Unary",
                 "args": [
                     "operator: Token",
-                    "right: Expr"
+                    "operand: Expr"
                 ]
             },
             {
@@ -55,6 +64,7 @@
                 "symbol": "Assign",
                 "args":[
                     "name: Token",
+                    "operator: Token",
                     "value: Expr"
                 ]
             }
@@ -72,10 +82,34 @@
                 ]
             },
             {
+                "name": "a break statement",
+                "symbol": "Break",
+                "args": [
+                    "..."
+                ]
+            },
+            {
+                "name": "an if statement",
+                "symbol": "If",
+                "args": [
+                    "condition: Expr",
+                    "then_branch: Stmt",
+                    "else_branch: Optional[Stmt]"
+                ]
+            },
+            {
                 "name": "a print statement",
                 "symbol": "Print",
                 "args": [
                     "expression: Expr"
+                ]
+            },
+            {
+                "name": "a while statement",
+                "symbol": "While",
+                "args": [
+                    "condition: Expr",
+                    "body: Stmt"
                 ]
             },
             {

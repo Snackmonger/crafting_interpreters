@@ -20,45 +20,86 @@ terminology to avoid introducing mistakes.
         | statement
         ;
     varDecl         
-        → "var" IDENTIFIER ("=" expression)? ";" 
+        → ("var" | type_annotation) IDENTIFIER ("=" expression)? ";" 
+        ;
+    type_annotation
+        → ("int" | "float" | "num" | "bool" | "string" | "char" |)
         ;
 
     // Statements
     statement       
-        → exprStmt
+        → block
         | printStmt
-        | block
-        ;
-    exprStmt        
-        → expression ";"
+        | ifStmt
+        | iterationStmt
+        | exprStmt
+        | gotoStmt
         ;
     printStmt      
         → "print" expression ";"
         ;
     block
         → "{" declaration "}"
+        ;
+    exprStmt        
+        → expression ";"
+        ;
+    gotoStmt
+        → breakStmt
+        | returnStmt
+        | continueStmt 
+        ;
+    iterationStmt
+        → whileStmt
+        | forStmt
+        | loopStmt
+        ;
+    whileStmt
+        → "while" "(" expression ")" statement
+        ;
+    forStmt        
+        → "for" "(" ( varDecl | exprStmt | ";" ) expression? ";" expression? ")" statement 
+        // TODO: | "for" "(" varDecl ":" listExpr ")" statement
+        ;
+    loopStmt
+        → "loop" statement ("until" "(" expression ")" )?
+        ;
+    breakStmt
+        → "break" ";"
+        ;
+    ifStmt
+        → "if" "(" expression ")" statement ( "else" statement )? 
+        ;
 
     // Expressions
     expression
         → assignment
         ; 
     assignment         
-        → IDENTIFIER "=" assignment
+        → IDENTIFIER ("=" | "+=" | "-=" | "*=" | "/=") assignment
         | ternary
-        ;
     ternary         
         → binary ("?" expression ":" ternary)?
         ;
-
     // Binary expressions
     binary          
-        → equality
-        ;    
+        → logic_or
+        ;
+    logic_or
+        → logic_and ("or" logic_and)*
+        ;
+    logic_and
+        → logic_or ("and" equality)*
+        | equality
+        ;
     equality        
         → comparison ( ( "!=" | "==" ) comparison )* 
         ;
     comparison      
-        → term ( ( ">" | ">=" | "<" | "<=" ) term )* 
+        → concatenation ( ( ">" | ">=" | "<" | "<=" ) concatenation )* 
+        ;
+    concatenation
+        → term (":+" concatenation)*
         ;
     term              
         → factor ( ( "-" | "+" ) factor )* 
@@ -69,13 +110,15 @@ terminology to avoid introducing mistakes.
 
     // Unary expressions
     unary           
-        → ( "!" | "-" ) unary 
-        | primary
+        → inversion
+        | postfixExpr
         ;
-
-    // pre_increment -> ("--" | "++") primary
-
-    // post_increment -> primary ("--" | "++") 
+    inversion
+        → ( "!" | "-" | "~" ) unary
+        ;
+    postfixExpr
+        → primary
+        ;    
 
     // Primary terminals
     primary         
@@ -94,6 +137,6 @@ terminology to avoid introducing mistakes.
         → ("==" | "!=") equality
         | (">=" | "<=" | "<" | ">") comparison
         | ("+") term
-        | ("*" | "/") factor
+        | ("*" | "/") factor 
         ;
 

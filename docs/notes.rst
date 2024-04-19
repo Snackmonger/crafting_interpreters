@@ -61,3 +61,23 @@ protocol, which has to be implemented in the interpreter::
         if self.is_truthy(cond):
             return self.evaluate(expr.true_branch)
         return self.evaluate(expr.false_branch)
+
+Chapter 2, Section 9: Control Flow
+----------------------------------
+
+This section's challenges really kicked my butt. I had to look up the answers to get anything more than a guess. I implemented the code given in
+the answers and tried to learn a little from them. Then I challenged myself to use what I'd learn to implement a few new things not mentioned
+in the official challenges:
+
+a. Since the chapter introduces a for-statement as syntactic sugar for a while loop, I challenged myself to use that idea to create another syntactic sugar in
+the form of a loop-statement. This will create an infinite loop in the form of a while-true-statement, but if an until-clause is given, it will be used as a 
+negation of the normal while-statement. It always performs the body statement at least once before exiting. I also made sure that the break-statement works 
+with the loop-until-statement.
+
+b. One of the earlier challenges suggested the idea that we could make the plus operator automatically stringify values if one of the operands is a string. 
+I didn't want to implement that idea at the time, so I skipped the challenge. Now, I added the ":+" operator specifically as a stringify-concatenate operator.
+Actually, this symbol is pretty ugly, so I want to change it, but "&" should be reserved for binary AND.
+Concatenation has a higher precedence than comparative operators, but lower than the arithmetic operators.
+
+c. When I was writing lox code to test the loops in the interpreter, I was getting annoyed with the lack of arithmetic assignment operators, so I 
+added support for +=, -=, /*=, /=.

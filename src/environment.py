@@ -30,4 +30,5 @@ class Environment:
             return
         if self.enclosing:
             self.enclosing.assign(name, value)
+            return
         raise LoxRuntimeError(name, "Undefined variable '" + name.lexeme + "'.")

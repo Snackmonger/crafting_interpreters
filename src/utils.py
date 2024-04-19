@@ -25,11 +25,7 @@ def is_truthy(obj: LoxValue) -> bool:
     """
     Evaluate a value as a boolean.
     """
-    if obj is None:
-        return False
-    if isinstance(obj, bool):
-        return bool(obj)
-    return True
+    return bool(obj)
 
 
 def is_equal(a: LoxValue, b: LoxValue) -> bool:

@@ -3,7 +3,10 @@
 The scanner is responsible for reading the source text and sorting its
 characters into meaningful lexical categories (tokens).
 """
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING
+
+from loguru import logger
+from data.annotations import LoxValue
 from data.enums import (
     Digraphs,
     Literals,
@@ -59,40 +62,53 @@ class Scanner():
             case '{': self.add_token(Monographs.LEFT_BRACE)
             case '}': self.add_token(Monographs.RIGHT_BRACE)
             case ',': self.add_token(Monographs.COMMA)
-            case '.': self.add_token(Monographs.DOT)
-            case '-': self.add_token(Monographs.MINUS)
-            case '+': self.add_token(Monographs.PLUS)
             case ';': self.add_token(Monographs.SEMICOLON)
-            case ':': self.add_token(Monographs.COLON)
             case '?': self.add_token(Monographs.QUESTION)
-            case '*': self.add_token(Monographs.STAR)
+            case '&': self.add_token(Monographs.AMPERSAND)
+            case '|': self.add_token(Monographs.PIPE)
+            case '*': self.add_token(Digraphs.MUL_ASSIGN if self.match("=") else Monographs.STAR)
             case "!": self.add_token(Digraphs.BANG_EQUAL if self.match("=") else Monographs.BANG)
             case "=": self.add_token(Digraphs.EQUAL_EQUAL if self.match("=") else Monographs.EQUAL)
             case "<": self.add_token(Digraphs.LESS_EQUAL if self.match("=") else Monographs.LESS)
             case ">": self.add_token(Digraphs.GREATER_EQUAL if self.match("=") else Monographs.GREATER)
+            case ':': self.add_token(Digraphs.CONCATENATE if self.match("+") else Monographs.COLON)
+            case '.': self.add_token(Digraphs.RANGE if self.match(".") else Monographs.DOT)
+            case '-':
+                if self.match("="):
+                    self.add_token(Digraphs.SUB_ASSIGN)
+                elif self.match("-"):
+                    self.add_token(Digraphs.DECREMENT)
+                else:
+                    self.add_token(Monographs.MINUS)
+            case '+':
+                if self.match("="):
+                    self.add_token(Digraphs.ADD_ASSIGN)
+                elif self.match("+"): 
+                    self.add_token(Digraphs.INCREMENT)
+                else:
+                    self.add_token(Monographs.PLUS)
             case "/":
                 if self.match("/"):
                     while self.peek != "\n" and not self.is_at_end:
                         self.advance()
-                if self.match("*"):
+                elif self.match("*"):
                     self.multiline_comment()
+                elif self.match("="):
+                    self.add_token(Digraphs.DIV_ASSIGN)
                 else:
                     self.add_token(Monographs.SLASH)
             case ' ': pass
             case '\r': pass
             case '\t': pass
-            case '\n': self.line += 1
-
+            case '\n':
+                self.line += 1
             case '"':
                 self.string()
-
             case _:
                 if is_digit(char):
                     self.number()
-
                 elif is_alpha(char):
                     self.identifier()
-
                 else:
                     self.lox.error(self.line, "Unexpected character.")
 
@@ -102,7 +118,7 @@ class Scanner():
         self.current += 1
         return char
 
-    def add_token(self, token_type: TokenType, literal: Optional[object] = None) -> None:
+    def add_token(self, token_type: TokenType, literal: LoxValue = None) -> None:
         """Create a new token with the given type label and an optional 
         literal value. 
         """

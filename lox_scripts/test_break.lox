@@ -1,0 +1,23 @@
+
+// Script to test whether the 'break' statement is working properly.
+
+var x = 0;
+var y = 0;
+
+while ( x < 10 ) {
+    x = x + 1;
+    for (var i = 0; i < 10; i = i + 1) {
+        if ( x == 9 ) {
+            // should skip all 
+            break;
+        }
+        y = y + 1;
+        print "y is";
+        print y;
+        
+        
+    }
+    
+}
+
+print x;

@@ -22,3 +22,5 @@ class LoxRuntimeError(LoxException):
         super().__init__(message)
         self.token=token
         
+class BreakException(LoxException):
+    """Error that informs the interpreter to exit the current loop."""

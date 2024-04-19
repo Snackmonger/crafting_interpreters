@@ -26,8 +26,12 @@
     match with a unique sequence of characters (S -> abc). In this expression, the grammar rules I wrote are 
     "right-regular" because the single non-terminal symbol always comes on the right side of the production.
 
-2. Aside from separating tokens—distinguishing print foo from printfoo—spaces aren't used for much in most languages. However, in a couple of dark corners, a space does affect how code is parsed in CoffeeScript, Ruby, and the C preprocessor. Where and what effect does it have in each of those languages?
+2. Aside from separating tokens—distinguishing print foo from printfoo—spaces aren't used for much in most languages. However, 
+in a couple of dark corners, a space does affect how code is parsed in CoffeeScript, Ruby, and the C preprocessor. Where and 
+what effect does it have in each of those languages?
 
+    Answer: (Since I don't know these languages, I had to check the book's answers to learn about this)
+    
     Ruby: Ruby allows for parentheses to be omitted in method invocations. This means that whitespace between a funtion name and its invocation
     can cause the parser to misinterpret an argument and an expression:
         f(3+2)+1 -> Function returns value, then 1 is added.
@@ -410,3 +414,41 @@ statement and finds the local ``a``, so it doesn't bother looking for the global
 This is how the assignment works in Python, which is what I'm familiar with. Users' expectations are determined by prior experience, so there's no way to know what they might expect.
 It seems like the behaviour makes sense, and it's what I would expect to happen.
 
+2.9: Control Flow
+-----------------
+
+1. A few chapters from now, when Lox supports first-class functions and dynamic dispatch, we technically won't 
+need branching statements built into the language. Show how conditional execution can be implemented in 
+terms of those. Name a language that uses this technique for its control flow.
+
+    Answer: I had absolutely no idea how even to begin approaching this problem, so I cheated and looked at the
+    answer in the book. Even though I don't get any points for this challenge, it was a good opportunity to learn
+    a new pattern, which I have implmented in the /tests/ folder.
+
+2. Likewise, looping can be implemented using those same tools, provided our interpreter supports an 
+important optimization. What is it, and why is it necessary? Name a language that uses this technique 
+for iteration.
+
+    Answer: Looping can be implemented with recursive function calls that track their loop number
+    as a depth number. What's the optimization? I suppose we need a way to track how deep the recursion
+    is allowed to go, so that it does not eat up all the available memory if it gets caught in a very
+    long loop.
+
+    As usual, the book gives a better answer:
+    "When you see heavy use of recursion like here where there are almost a hundred recursive calls, the 
+    concern is overflowing the stack. However, in many cases, you don't need to preserve any information 
+    from the previous call when beginning a recursive call. If the recursive call is in tail position -- 
+    it's the last thing in the body of the function -- then you can discard any stack space used by the 
+    previous call before beginning the next one.
+
+    This tail call optimization lets you use recursion for an unbounded number of iterations while consuming 
+    only a constant amount of stack space. Scheme and some other functional languages require an 
+    implementation to perform this optimization so that users can safely rely on recursion for iteration."
+
+3. Unlike Lox, most other C-style languages also support break and continue statements inside loops. 
+Add support for break statements.
+
+    The syntax is a break keyword followed by a semicolon. It should be a syntax error to have a break 
+    statement appear outside of any enclosing loop. At runtime, a break statement causes execution to 
+    jump to the end of the nearest enclosing loop and proceeds from there. Note that the break may be 
+    nested inside other blocks and if statements that also need to be exited.

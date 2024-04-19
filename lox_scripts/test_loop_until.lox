@@ -1,0 +1,44 @@
+// Test script for the loop-until syntaxtic sugar.
+
+// Basic loop-until syntax.
+var x = 0;
+loop {
+    print x;
+    x = x + 1;
+} until (x > 10)
+
+// Test for an infinite loop and a break statement.
+var y = 0;
+loop {
+    print "infinite loop!!!";
+    y = y + 1;
+    if (y > 10) break;
+}
+
+
+// Test for nested loop types.
+
+var z = 0;
+var t = 0;
+var v = 0;
+
+while (v < 10) {
+    print "Now in the WHILE loop for the ";
+    print v;
+
+    for (var i = 0; i < 10; i = i + 2) {
+        print "now in the FOR loop for the ";
+        print i;
+
+        loop {
+            print "now in the LOOP loop for the";
+            print t;
+            t = t + 1;
+            if (i > 5) {
+                print "triggered break";
+                break;
+            }
+        } until (t >= 5)
+    }
+    v = v + 1;
+}

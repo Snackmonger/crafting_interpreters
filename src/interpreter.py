@@ -10,26 +10,31 @@ from typing import TYPE_CHECKING, Any, Sequence
 # from loguru import logger
 from data.enums import (
     Digraphs,
-    Monographs
+    Monographs,
+    ReservedWords
 )
-from data.errors import LoxRuntimeError
+from data.errors import BreakException, LoxRuntimeError
 from data.annotations import LoxValue, UninitializedVariable
 from src import utils
 from src.environment import Environment
 from src.expressions import (
+    Expr,
+    Expression,
+    If,
+    Stmt,
     Assign,
     Binary,
     Block,
-    Expression,
-    Literal,
+    Break,
     Grouping,
-    Expr,
+    Literal,
+    Logical,
     Print,
-    Stmt,
-    Ternary,
     Unary,
+    Ternary,
     Var,
-    Variable
+    Variable,
+    While
 )
 
 if TYPE_CHECKING:
@@ -104,35 +109,68 @@ class Interpreter:
         self.execute_block(stmt.statements, Environment(self.environment))
 
     def visit_VarStmt(self, stmt: Var) -> None:
-        """Interpret a variable statement::
-
-            varDecl → "var" IDENTIFIER ("=" expression)? ";"
-        """
+        """Interpret a variable statement"""
         value: LoxValue = UninitializedVariable()
         if stmt.initializer is not None:
             value = self.evaluate(stmt.initializer)
         self.environment.define(stmt.name.lexeme, value)
 
-    def visit_AssignExpr(self, expr: Assign) -> None:
-        """Interpret an assignment expression.
+    def visit_WhileStmt(self, stmt: While) -> None:
+        """Interpret a while statement."""
+        try:
+            while utils.is_truthy(self.evaluate(stmt.condition)):
+                self.execute(stmt.body)
+        except BreakException:
+            pass
 
-        ``assignment → IDENTIFIER "=" assignment| ternary``
-        """
+    def visit_BreakStmt(self, stmt: Break) -> None:
+        """Interpret a break statement."""
+        raise BreakException()
+
+
+    def visit_AssignExpr(self, expr: Assign) -> None:
+        """Interpret an assignment expression."""
         value: LoxValue = self.evaluate(expr.value)
-        self.environment.assign(expr.name, value)
+        if expr.operator.token_type == Monographs.EQUAL:
+            self.environment.assign(expr.name, value)
+            
+        else:
+            old = self.environment.get(expr.name)
+            utils.check_number_operands(expr.operator, value, old)
+            assert isinstance(old, float)
+            assert isinstance(value, float)
+            match expr.operator.token_type:
+                case Digraphs.ADD_ASSIGN:
+                    value += old
+                    self.environment.assign(expr.name, value)
+                case Digraphs.SUB_ASSIGN:
+                    value -= old
+                    self.environment.assign(expr.name, value)
+                case Digraphs.MUL_ASSIGN:
+                    value *= old
+                    self.environment.assign(expr.name, value)
+                case Digraphs.DIV_ASSIGN:
+                    value /= old
+                    self.environment.assign(expr.name, value)
+                case _:
+                    raise LoxRuntimeError(expr.operator, "Unknown operator.")
 
     def visit_ExpressionStmt(self, stmt: Expression) -> None:
-        """Interpret an expression statement::
-
-            exprStmt → expression ";"
-        """
+        """Interpret an expression statement"""
         self.evaluate(stmt.expression)
 
-    def visit_PrintStmt(self, stmt: Print) -> None:
-        """Interpret a print statement::
-
-            printStmt → "print" expression ";"
+    def visit_IfStmt(self, stmt: If) -> None:
+        """Interpret a conditional statement.
+        
         """
+        if utils.is_truthy(self.evaluate(stmt.condition)):
+            self.execute(stmt.then_branch)
+        elif stmt.else_branch:
+            self.execute(stmt.else_branch)
+
+
+    def visit_PrintStmt(self, stmt: Print) -> None:
+        """Interpret a print statement"""
         value: LoxValue = self.evaluate(stmt.expression)
         print(utils.stringify(value))
 
@@ -140,23 +178,20 @@ class Interpreter:
     # EXPRESSION VISITOR INTERFACE #
     ################################
     def visit_TernaryExpr(self, expr: Ternary) -> LoxValue:
-        """Interpret a ternary::
-
-            ternary → binary ("?" expression ":" ternary)?
-        """
+        """Interpret a ternary"""
         cond = self.evaluate(expr.condition)
         if utils.is_truthy(cond):
             return self.evaluate(expr.true_branch)
         return self.evaluate(expr.false_branch)
 
     def visit_BinaryExpr(self, expr: Binary) -> LoxValue:
-        """Interpret a binary::
+        """Interpret a binary.
 
-            binary → equality    
-            equality → comparison ( ( "!=" | "==" ) comparison )* 
-            comparison → term ( ( ">" | ">=" | "<" | "<=" ) term )* 
-            term → factor ( ( "-" | "+" ) factor )*
-            factor → unary ( ( "/" | "*" ) unary )* 
+        ``binary → equality``
+        ``equality → comparison ( ( "!=" | "==" ) comparison )*``
+        ``comparison → term ( ( ">" | ">=" | "<" | "<=" ) term )*``
+        ``term → factor ( ( "-" | "+" ) factor )*``
+        ``factor → unary ( ( "/" | "*" ) unary )*``
         """
         left: Any = self.evaluate(expr.left)
         right: Any = self.evaluate(expr.right)
@@ -180,6 +215,9 @@ class Interpreter:
             case Digraphs.LESS_EQUAL:
                 utils.check_number_operands(expr.operator, left, right)
                 return left <= right
+            # Concatenative
+            case Digraphs.CONCATENATE:
+                return utils.stringify(left) + utils.stringify(right)
             # Additive
             case Monographs.MINUS:
                 utils.check_number_operands(expr.operator, left, right)
@@ -198,14 +236,13 @@ class Interpreter:
             case Monographs.STAR:
                 utils.check_number_operands(expr.operator, left, right)
                 return left * right
-
             case _:
                 return None
 
     def visit_UnaryExpr(self, expr: Unary) -> LoxValue:
-        """Interpret a unary::
+        """Interpret a unary.
 
-            unary → ( "!" | "-" ) unary | primary
+        ``unary → ( "!" | "-" ) unary | primary``
         """
         right: Any = self.evaluate(expr.right)
         match expr.operator.token_type:
@@ -219,9 +256,9 @@ class Interpreter:
                 return
 
     def visit_VariableExpr(self, expr: Variable) -> LoxValue:
-        """Interpret a variable expression::
+        """Interpret a variable expression.
 
-            IDENTIFIER → primary
+        ``IDENTIFIER → primary``
         """
         value = self.environment.get(expr.name)
         if isinstance(value, UninitializedVariable):
@@ -232,13 +269,27 @@ class Interpreter:
     def visit_LiteralExpr(self, expr: Literal) -> LoxValue:
         """Interpret a literal expression::
 
-            NUMBER | STRING | "true" | "false" | "nil" 
+        ``NUMBER | STRING | "true" | "false" | "nil"``
         """
         return expr.value
+    
+    def visit_LogicalExpr(self, expr: Logical) -> LoxValue:
+        """Interpret a logical expression.
+        
+        
+        `` ``
+        """
+        left: LoxValue = self.evaluate(expr.left)
+        if expr.operator.token_type == ReservedWords.OR:
+            if utils.is_truthy(left):
+                return left
+        if not utils.is_truthy(left):
+            return left
+        return self.evaluate(expr.right)
 
     def visit_GroupingExpr(self, expr: Grouping) -> LoxValue:
-        """Interpret a grouping expression::
+        """Interpret a grouping expression.
 
-            "(" expression ")"
+        ``"(" expression ")"``
         """
         return self.evaluate(expr.expression)

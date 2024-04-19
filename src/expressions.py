@@ -49,6 +49,16 @@ class Literal(Expr):
         return visitor.visit_LiteralExpr(self)
 
 @dataclass
+class Logical(Expr):
+    """Representation of a logical expression."""
+    left: Expr
+    operator: Token
+    right: Expr
+
+    def accept(self, visitor: ExprVisitor) -> Any:
+        return visitor.visit_LogicalExpr(self)
+
+@dataclass
 class Unary(Expr):
     """Representation of a unary expression."""
     operator: Token
@@ -79,6 +89,7 @@ class Variable(Expr):
 class Assign(Expr):
     """Representation of an assignment expression."""
     name: Token
+    operator: Token
     value: Expr
 
     def accept(self, visitor: ExprVisitor) -> Any:
@@ -93,12 +104,39 @@ class Expression(Stmt):
         return visitor.visit_ExpressionStmt(self)
 
 @dataclass
+class Break(Stmt):
+    """Representation of a break statement."""
+    ...
+
+    def accept(self, visitor: StmtVisitor) -> Any:
+        return visitor.visit_BreakStmt(self)
+
+@dataclass
+class If(Stmt):
+    """Representation of an if statement."""
+    condition: Expr
+    then_branch: Stmt
+    else_branch: Optional[Stmt]
+
+    def accept(self, visitor: StmtVisitor) -> Any:
+        return visitor.visit_IfStmt(self)
+
+@dataclass
 class Print(Stmt):
     """Representation of a print statement."""
     expression: Expr
 
     def accept(self, visitor: StmtVisitor) -> Any:
         return visitor.visit_PrintStmt(self)
+
+@dataclass
+class While(Stmt):
+    """Representation of a while statement."""
+    condition: Expr
+    body: Stmt
+
+    def accept(self, visitor: StmtVisitor) -> Any:
+        return visitor.visit_WhileStmt(self)
 
 @dataclass
 class Var(Stmt):

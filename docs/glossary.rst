@@ -177,11 +177,15 @@ Panic Mode
 When the parser encounters an error, it enters panic mode. It knows that at least one token doesn't make sense
 in its current state in the middle of some stack of grammar productions.
 
-Before it can get back to parsin, it needs to get its state and the sequence of forthcoming
+Before it can get back to parsing, it needs to get its state and the sequence of forthcoming
 tokens aligned such that the next token does match the rule being parsed. This process is called synchronization.
 
 To do that, we select a rule in the grammar that will mark the synchronization point. The parser fixes its state by 
 jumping out of any nested productions until it gets back to this rule. Then it synchronizes the token stream by
 discarding tokens until it reaches one that can appear at that point in the rule.
 
-
+Short-Circuit Operators
+-----------------------
+When a binary operator involves a truth comparison, we face a choice whether it is necessary to evaluate both sides
+of the operation for truthiness. If we have a ``and`` or an ``or`` operator, then it will be clear from the truthiness 
+of the first whether it is necessary to evaluate the second. 
